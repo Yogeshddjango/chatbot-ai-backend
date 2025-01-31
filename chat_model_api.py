@@ -5,12 +5,12 @@ import logging
 import requests
 from dotenv import load_dotenv
 from fastapi.responses import JSONResponse
-from rag_folder.question_answer import ChatBot
 from fastapi.responses import StreamingResponse
+from src.rag_folder.question_answer import ChatBot
 from starlette.middleware.cors import CORSMiddleware
-from database.organisation_database import DatabaseManager
+from src.database.organisation_database import DatabaseManager
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Query, Body
-from organisation_embedding_creation.embedding_generation import CreateDataEmbedding
+from src.organisation_embedding_creation.embedding_generation import CreateDataEmbedding
 
 app = FastAPI()
 load_dotenv()

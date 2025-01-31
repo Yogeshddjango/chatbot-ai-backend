@@ -5,18 +5,18 @@ from typing import Dict
 from dotenv import load_dotenv
 from typing_extensions import TypedDict
 from langchain_openai import ChatOpenAI
-from organisation_prompts.prompts import *
 from langgraph.graph import END, StateGraph
 from langchain_openai import OpenAIEmbeddings
+from src.organisation_prompts.prompts import *
 from langchain.globals import set_verbose, set_debug
 from langchain.schema import HumanMessage, AIMessage
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain_core.output_parsers import JsonOutputParser
-from memory_management.organisations_chat_history import ChatHistory
 from langchain_core.runnables.history import RunnableWithMessageHistory
-from database.organisation_vector_database import VectorStorePostgresVector
-from database.organisation_retrieval_history import OrganiationHistoryManager
+from src.memory_management.organisations_chat_history import ChatHistory
+from src.database.organisation_vector_database import VectorStorePostgresVector
+from src.database.organisation_retrieval_history import OrganiationHistoryManager
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder, PromptTemplate, HumanMessagePromptTemplate
 
 load_dotenv()
