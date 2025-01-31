@@ -1,13 +1,11 @@
 import os
-import torch
 import logging
 from typing import List
 from dotenv import load_dotenv
 from langchain.schema import Document
 from langchain_openai import OpenAIEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_huggingface.embeddings import HuggingFaceEmbeddings
-from database.organisation_vector_database import VectorStorePostgresVector
+from src.database.organisation_vector_database import VectorStorePostgresVector
 
 load_dotenv()
 logging.basicConfig(
