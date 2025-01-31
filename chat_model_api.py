@@ -1,4 +1,5 @@
 import os
+import json
 import uvicorn
 import logging
 import requests
@@ -9,6 +10,7 @@ from fastapi.responses import StreamingResponse
 from starlette.middleware.cors import CORSMiddleware
 from database.organisation_database import DatabaseManager
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Query, Body
+from organisation_embedding_creation.embedding_generation import CreateDataEmbedding
 
 app = FastAPI()
 load_dotenv()
@@ -28,15 +30,52 @@ app.add_middleware(
 async def hello():
     return "<h1 style='color:blue'>Hello There!</h1>"
 
-@app.get("/api/organisation_database/")
-async def upload_file(
-    organisation_id: str = Query(..., description="ID of the organisation")
-):
-    organisation_data = requests.get(EXTERNAL_API_URL.format(org_id=org_id))
+@app.post("/api/organisation_database/")
+async def upload_file(organisation_id: str = Query(..., description="Organisation ID is required")):
+    # organisation_data = requests.get(EXTERNAL_API_URL.format(org_id=org_id))
 
+    data = {
+            "organization_details": {
+                "name": "Tech Innovators Ltd.",
+                "address": {
+                "street": "123 Innovation Drive",
+                "city": "San Francisco",
+                "state": "CA",
+                "zip": "94107",
+                "country": "USA"
+                },
+                "contact": {
+                "phone": "+1-415-123-4567",
+                "email": "contact@techinnovators.com",
+                "website": "https://www.techinnovators.com"
+                },
+                "departments": [
+                {
+                    "name": "Engineering",
+                    "head": "John Doe",
+                    "employees": 120
+                },
+                {
+                    "name": "Marketing",
+                    "head": "Jane Smith",
+                    "employees": 45
+                },
+                {
+                    "name": "Human Resources",
+                    "head": "Robert Brown",
+                    "employees": 30
+                }
+                ],
+                "established_year": 2010,
+                "employees_count": 500,
+                "revenue": "50M USD",
+                "industry": "Technology"
+            }
+        }
+    organisation_data_from_frontend = json.dumps(data)
     organisation_data = {
         "organisation_id": organisation_id,
-        "organisation_data": organisation_data,
+        "organisation_data": organisation_data_from_frontend,
         "ai_embeddings_status": "Pending",
         "ai_embeddings_reason": "Initial processing"
     }
@@ -44,6 +83,17 @@ async def upload_file(
     orgainsation_database_object = DatabaseManager()
     orgainsation_database_object.connect()
     orgainsation_database_object.insert_or_update_data(organisation_data)
+
+    organisation_vector_database = CreateDataEmbedding()
+    embedding_status = organisation_vector_database._create_embedding_selection(organisation_data)
+
+    orgainsation_database_object.insert_or_update_data(embedding_status)
+    orgainsation_database_object.close()
+
+    return JSONResponse(content={
+            "message": embedding_status['ai_embeddings_reason'],
+            "status": embedding_status['ai_embeddings_status']
+        })
 
 
 @app.get("/api/organisation_chatbot/{organisation_id}")
