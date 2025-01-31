@@ -7,3 +7,4 @@ torch==2.6.0
 langchain-huggingface==0.1.2
 langchain==0.3.16
 psycopg2==2.9.10
+langgraph==0.2.69
