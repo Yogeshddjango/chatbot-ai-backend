@@ -1,0 +1,9 @@
+uvicorn==0.34.0
+python-dotenv==1.0.1
+fastapi==0.115.7
+psycopg==3.2.4
+langchain-postgres==0.0.12
+torch==2.6.0
+langchain-huggingface==0.1.2
+langchain==0.3.16
+psycopg2==2.9.10

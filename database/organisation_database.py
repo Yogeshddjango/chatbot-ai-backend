@@ -85,14 +85,13 @@ class DatabaseManager:
                 organisation_id, organisation_data, ai_embeddings_status,
                 ai_embeddings_reason, created_at, modified_at
             )
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, %s, %s)
             """
         )
         query_update = (
             """
             UPDATE organisation_data
-            SET organisation_data = %s,
-                ai_embeddings_status = %s,
+            SET ai_embeddings_status = %s,
                 ai_embeddings_reason = %s,
                 modified_at = %s
             WHERE organisation_id = %s
@@ -110,7 +109,6 @@ class DatabaseManager:
                     cur.execute(
                         query_update,
                         (
-                            data["organisation_data"],
                             data["ai_embeddings_status"],
                             data["ai_embeddings_reason"],
                             now,
