@@ -31,48 +31,11 @@ async def hello():
     return "<h1 style='color:blue'>Hello There!</h1>"
 
 @app.post("/api/organisation_database/")
-async def upload_file(organisation_id: str = Query(..., description="Organisation ID is required")):
-    # organisation_data = requests.get(EXTERNAL_API_URL.format(org_id=org_id))
-
-    data = {
-            "organization_details": {
-                "name": "Tech Innovators Ltd.",
-                "address": {
-                "street": "123 Innovation Drive",
-                "city": "San Francisco",
-                "state": "CA",
-                "zip": "94107",
-                "country": "USA"
-                },
-                "contact": {
-                "phone": "+1-415-123-4567",
-                "email": "contact@techinnovators.com",
-                "website": "https://www.techinnovators.com"
-                },
-                "departments": [
-                {
-                    "name": "Engineering",
-                    "head": "John Doe",
-                    "employees": 120
-                },
-                {
-                    "name": "Marketing",
-                    "head": "Jane Smith",
-                    "employees": 45
-                },
-                {
-                    "name": "Human Resources",
-                    "head": "Robert Brown",
-                    "employees": 30
-                }
-                ],
-                "established_year": 2010,
-                "employees_count": 500,
-                "revenue": "50M USD",
-                "industry": "Technology"
-            }
-        }
-    organisation_data_from_frontend = json.dumps(data)
+async def upload_file(
+        organisation_id: str = Query(..., description="Organisation ID is required"),
+        organisation_data: dict = Body(..., embed=True)
+    ):
+    organisation_data_from_frontend = json.dumps(organisation_data)
     organisation_data = {
         "organisation_id": organisation_id,
         "organisation_data": organisation_data_from_frontend,
@@ -113,3 +76,6 @@ async def get_organisation_data(
     chatbot = ChatBot()
     answer = chatbot.get_response(data)
     return JSONResponse(content=answer)
+
+if __name__ == "__main__":
+    uvicorn.run(app, host='0.0.0.0')
