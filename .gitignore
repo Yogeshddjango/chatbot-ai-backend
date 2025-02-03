@@ -1,0 +1,8 @@
+chat_env/
+__pycache__/
+pgvector/
+.env
+access_log
+error_log
+gunicorn_conf.py 
+gunicorn.sock
