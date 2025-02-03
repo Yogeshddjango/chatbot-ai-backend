@@ -59,9 +59,9 @@ async def upload_file(
         })
 
 
-@app.get("/api/organisation_chatbot/{organisation_id}")
+@app.get("/api/organisation_chatbot/")
 async def get_organisation_data(    
-                        organisation_id,
+                        organisation_id: str = Query(..., description="Organisation ID is required"),
                         user_query: str = Body(..., embed=True),
                     )-> JSONResponse:
 
@@ -76,6 +76,3 @@ async def get_organisation_data(
     chatbot = ChatBot()
     answer = chatbot.get_response(data)
     return JSONResponse(content=answer)
-
-if __name__ == "__main__":
-    uvicorn.run(app, host='0.0.0.0')
