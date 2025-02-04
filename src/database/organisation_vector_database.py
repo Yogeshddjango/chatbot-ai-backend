@@ -82,7 +82,7 @@ class VectorStorePostgresVector:
                     "status": True,
                     "organisation_id": organisation_id,
                     "ai_embeddings_status": "Completed",
-                    "ai_embeddings_reason": f"Embeddings of {organisation_id} is generated successfully"
+                    "ai_embeddings_reason": f"Embeddings of organisation id: {organisation_id} is generated successfully"
                 }
         except Exception as e:
             return {

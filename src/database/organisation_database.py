@@ -13,13 +13,10 @@ DBPW = os.getenv("DBPW")
 DBHOST = os.getenv("DBHOST")
 DBPORT = os.getenv("DBPORT")
 
+
 class DatabaseManager:
     def __init__(self):
-        """Initialize the database manager with configuration.
-
-        Args:
-            db_config (Dict[str, str]): A dictionary containing database connection details like host, database, user, and password.
-        """
+        """Initialize the database manager with configuration."""
         self.db_config = {
             "dbname": DBNAME,
             "user": DBUSER,
@@ -48,12 +45,24 @@ class DatabaseManager:
             except Exception as e:
                 raise ConnectionError(f"Failed to close the database connection: {e}")
 
+    def drop_table_if_exists(self) -> None:
+        """Drop the table if it already exists."""
+        query = "DROP TABLE IF EXISTS organisation_data"
+        try:
+            with self.conn.cursor() as cur:
+                cur.execute(query)
+                self.conn.commit()
+                print("Table dropped if it existed.")
+        except Exception as e:
+            self.conn.rollback()
+            raise RuntimeError(f"Failed to drop table: {e}")
+
     def create_table_if_not_exists(self) -> None:
         """Create the table if it does not already exist."""
         query = (
             """
             CREATE TABLE IF NOT EXISTS organisation_data (
-                organisation_id TEXT PRIMARY KEY,
+                organisation_id SERIAL PRIMARY KEY,
                 organisation_data TEXT NOT NULL,
                 ai_embeddings_status TEXT NOT NULL,
                 ai_embeddings_reason TEXT,
@@ -70,28 +79,30 @@ class DatabaseManager:
         except Exception as e:
             raise RuntimeError(f"Failed to create table: {e}")
 
-    def insert_or_update_data(self, data: Dict[str, Any]) -> None:
-        """Insert or update data in the table.
+    def insert_or_update_data(self, data: Dict[str, Any]) -> int:
+        """Insert or update data in the table and return the organisation_id.
 
         Args:
             data (Dict[str, Any]): A dictionary containing the data to be inserted or updated.
+
+        Returns:
+            int: The organisation_id of the inserted or updated record.
         """
-        query_check = (
-            "SELECT organisation_id FROM organisation_data WHERE organisation_id = %s"
-        )
         query_insert = (
             """
             INSERT INTO organisation_data (
-                organisation_id, organisation_data, ai_embeddings_status,
+                organisation_data, ai_embeddings_status,
                 ai_embeddings_reason, created_at, modified_at
             )
-            VALUES (%s, %s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, %s)
+            RETURNING organisation_id
             """
         )
         query_update = (
             """
             UPDATE organisation_data
-            SET ai_embeddings_status = %s,
+            SET organisation_data = %s,
+                ai_embeddings_status = %s,
                 ai_embeddings_reason = %s,
                 modified_at = %s
             WHERE organisation_id = %s
@@ -101,27 +112,26 @@ class DatabaseManager:
         now = datetime.now()
         try:
             with self.conn.cursor() as cur:
-                cur.execute(query_check, (data["organisation_id"],))
-                result = cur.fetchone()
-
-                if result:
-                    # Update existing record
+                if "organisation_id" in data and data["organisation_id"] is not None:
                     cur.execute(
                         query_update,
                         (
+                            data["organisation_data"],
                             data["ai_embeddings_status"],
                             data["ai_embeddings_reason"],
                             now,
                             data["organisation_id"],
                         ),
                     )
-                    print("Record updated.")
+                    organisation_id = data["organisation_id"]
+                    data = {
+                        "organisation_id": organisation_id,
+                        "message": f"Data updated for the {organisation_id}"
+                    }
                 else:
-                    # Insert new record
                     cur.execute(
                         query_insert,
                         (
-                            data["organisation_id"],
                             data["organisation_data"],
                             data["ai_embeddings_status"],
                             data["ai_embeddings_reason"],
@@ -129,19 +139,23 @@ class DatabaseManager:
                             now,
                         ),
                     )
-                    print("Record inserted.")
+                    organisation_id = cur.fetchone()[0]
+                    data = {
+                        "organisation_id": organisation_id,
+                        "message": f"Data inserted for the {organisation_id}"
+                    }
 
                 self.conn.commit()
+                return data
         except Exception as e:
             self.conn.rollback()
             raise RuntimeError(f"Failed to insert or update data: {e}")
 
-# # Example Usage
 # if __name__ == "__main__":
 #     db_manager = DatabaseManager()
 #     try:
 #         db_manager.connect()
-#         db_manager.create_table_if_not_exists()
-
+#         db_manager.drop_table_if_exists()  # Drop the table if it exists
+#         db_manager.create_table_if_not_exists()  # Create the table
 #     finally:
 #         db_manager.close()

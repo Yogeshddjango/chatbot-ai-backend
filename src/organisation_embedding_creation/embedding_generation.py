@@ -72,7 +72,7 @@ class CreateDataEmbedding:
             vector_store.delete_documents_from_collection(str(data['organisation_id']))
             status = vector_store.store_docs_to_collection(str(data['organisation_id']), doc_split)
             if status['status']:
-                status["ai_embeddings_reason"] = f"Embeddings of {data['organisation_id']} is updated successfully"
+                status["ai_embeddings_reason"] = f"Embeddings of organisation id: {data['organisation_id']} is updated successfully"
         
         return status
 

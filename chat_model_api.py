@@ -3,6 +3,7 @@ import json
 import uvicorn
 import logging
 import requests
+from typing import Optional
 from dotenv import load_dotenv
 from fastapi.responses import JSONResponse
 from fastapi.responses import StreamingResponse
@@ -32,28 +33,45 @@ async def hello():
 
 @app.post("/api/organisation_database/")
 async def upload_file(
-        organisation_id: str = Query(..., description="Organisation ID is required"),
+        organisation_id: Optional[int] = Query(None, description="Organisation ID is optional"),
         organisation_data: dict = Body(..., embed=True)
     ):
     organisation_data_from_frontend = json.dumps(organisation_data)
-    organisation_data = {
-        "organisation_id": organisation_id,
-        "organisation_data": organisation_data_from_frontend,
-        "ai_embeddings_status": "Pending",
-        "ai_embeddings_reason": "Initial processing"
-    }
+    
+    if not organisation_id:
+        organisation_data = {
+            "organisation_data": organisation_data_from_frontend,
+            "ai_embeddings_status": "Pending",
+            "ai_embeddings_reason": "Initial processing"
+        }
+    else:
+        organisation_data = {
+            "organisation_id": organisation_id,
+            "organisation_data": organisation_data_from_frontend,
+            "ai_embeddings_status": "Pending",
+            "ai_embeddings_reason": "Initial processing"
+        }
 
     orgainsation_database_object = DatabaseManager()
     orgainsation_database_object.connect()
-    orgainsation_database_object.insert_or_update_data(organisation_data)
+    organisation_status = orgainsation_database_object.insert_or_update_data(organisation_data)
+
+    organisation_data = {
+            "organisation_id": str(organisation_status['organisation_id']),
+            "organisation_data": organisation_data_from_frontend,
+            "ai_embeddings_status": "Pending",
+            "ai_embeddings_reason": "Initial processing"
+        }
 
     organisation_vector_database = CreateDataEmbedding()
     embedding_status = organisation_vector_database._create_embedding_selection(organisation_data)
+    embedding_status['organisation_data'] = organisation_data_from_frontend
 
     orgainsation_database_object.insert_or_update_data(embedding_status)
     orgainsation_database_object.close()
 
     return JSONResponse(content={
+            "organisation_id": organisation_status["organisation_id"],
             "message": embedding_status['ai_embeddings_reason'],
             "status": embedding_status['ai_embeddings_status']
         })
@@ -76,3 +94,7 @@ async def get_organisation_data(
     chatbot = ChatBot()
     answer = chatbot.get_response(data)
     return JSONResponse(content=answer)
+
+
+if __name__ == "__main__":
+    uvicorn.run(app, host='0.0.0.0')
