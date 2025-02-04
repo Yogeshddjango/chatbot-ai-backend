@@ -79,7 +79,7 @@ async def upload_file(
 
 @app.get("/api/organisation_chatbot/")
 async def get_organisation_data(    
-                        organisation_id: str = Query(..., description="Organisation ID is required"),
+                        organisation_id: int = Query(..., description="Organisation ID is required"),
                         user_query: str = Body(..., embed=True),
                     )-> JSONResponse:
 
@@ -88,7 +88,7 @@ async def get_organisation_data(
 
     data = {
         "user_query": user_query,
-        "organisation_id": organisation_id
+        "organisation_id": str(organisation_id)
     }
     
     chatbot = ChatBot()
