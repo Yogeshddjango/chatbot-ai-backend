@@ -43,3 +43,33 @@ ANSWER_PROMPT = """**GUIDELINES:
                         - You are a grader assessing whether an answer addresses / resolves a question.
                         - Give a binary score 'yes' or 'no'. Yes' means that the answer resolves the question.
                 """
+
+
+FUNCTION_DESC = [
+            {
+                "name": "get_user_data",
+                "description": "Get the data for the user",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "name": {
+                            "type": "string",
+                            "description": "The name of the user, e.g. Mohak",
+                        },
+                        "phonenumber": {
+                            "type": "string",
+                            "description": "the phonenumber of the user, e.g. +123456789",
+                        },
+                        "email": {
+                            "type": "string",
+                            "description": "the email of the user, e.g. mohak@example.com",
+                        },
+                        "reason": {
+                            "type": "string",
+                            "description": "the task reason that the user will provide.",
+                        },
+                    },
+                    "required": ["name", "phonenumber", "email", "reason"],
+                },
+            }
+        ]
