@@ -45,7 +45,7 @@ class ChatBot:
             vector_store = VectorStorePostgresVector("organisation_embeddings", self.embedding_model)
             return vector_store.get_or_create_collection().as_retriever(
                                                                 search_type="mmr",
-                                                                search_kwargs={"id": organisation_id},
+                                                                search_kwargs={"metadata.id": str(organisation_id)},
                                                             )
         except Exception:
             return None
@@ -71,9 +71,9 @@ class ChatBot:
                                                     name=data['organisation_id'],
                                                     content="oragnisation_data",
                                                 ))
-        
         retriever = self._vectorstore_retriever(data['organisation_id'])
         documents = retriever.get_relevant_documents(data['user_query'])
+        filtered_docs = [doc for doc in documents if doc.id == str(data['organisation_id'])]
 
         act_prompt = ACT_PROMPT
         act_prompt = ChatPromptTemplate.from_messages(
@@ -95,7 +95,7 @@ class ChatBot:
                                 history_messages_key="chat_history",
                             )
         generation = chain_with_message_history.invoke(
-                {"question": data['user_query'], "context": documents},
+                {"question": data['user_query'], "context": filtered_docs},
                 {"configurable": {"session_id": data['organisation_id']}},
             )
 
