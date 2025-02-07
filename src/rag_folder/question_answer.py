@@ -39,6 +39,8 @@ class ChatBot:
                                     api_key=OPENAI_API_KEY,
                                     dimensions=DIMENSION,
                                 )
+        self.chat_model_json = self.chat_model.bind(response_format={"type": "json_object"})
+
 
     def _vectorstore_retriever(self, organisation_id):
         try:
@@ -86,7 +88,7 @@ class ChatBot:
                             ("human", "{question}"),
                         ]
                     )
-        rag_chain = act_prompt | self.chat_model | JsonOutputParser()
+        rag_chain = act_prompt | self.chat_model_json | JsonOutputParser()
 
         chain_with_message_history = RunnableWithMessageHistory(
                                 rag_chain,
