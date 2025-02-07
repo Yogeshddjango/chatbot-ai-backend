@@ -79,12 +79,15 @@ async def upload_file(
 
 @app.post("/api/organisation_chatbot/")
 async def get_organisation_data(    
-                        organisation_id: int = Query(..., description="Organisation ID is required"),
+                        organisation_id: Optional[int] = Query(None, description="Organisation ID is optional"),
                         user_query: str = Body(..., embed=True),
                     )-> JSONResponse:
 
     if not user_query:
         raise HTTPException(status_code=400, detail="Missing query")
+
+    if not organisation_id:
+        raise HTTPException(status_code=400, detail="Missing Organisation ID")
 
     data = {
         "user_query": user_query,
