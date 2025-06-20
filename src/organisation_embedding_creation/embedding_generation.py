@@ -29,6 +29,7 @@ class CreateDataEmbedding:
                                     api_key=OPENAI_API_KEY,
                                     dimensions=DIMENSION,
                                 )
+                                
         self.text_splitter = RecursiveCharacterTextSplitter(
                                 chunk_size=CHUNK_SIZE,
                                 chunk_overlap=CHUNK_OVERLAP,

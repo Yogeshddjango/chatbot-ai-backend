@@ -3,6 +3,7 @@ import json
 import uvicorn
 import logging
 import requests
+import time
 from typing import Optional
 from dotenv import load_dotenv
 from fastapi.responses import JSONResponse
@@ -27,9 +28,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/api/")
-async def hello():
-    return "<h1 style='color:blue'>Hello There!</h1>"
+# @app.get("/api/")
+# async def hello():
+#     return "<h1 style='color:blue'>Hello There!</h1>"
 
 @app.post("/api/organisation_database/")
 async def upload_file(
@@ -64,6 +65,7 @@ async def upload_file(
         }
 
     organisation_vector_database = CreateDataEmbedding()
+    time.sleep(2) 
     embedding_status = organisation_vector_database._create_embedding_selection(organisation_data)
     embedding_status['organisation_data'] = organisation_data_from_frontend
 
@@ -93,7 +95,7 @@ async def get_organisation_data(
         "user_query": user_query,
         "organisation_id": str(organisation_id)
     }
-    
+    time.sleep(2) 
     chatbot = ChatBot()
     answer = chatbot.get_response(data)
     return JSONResponse(content=answer)
